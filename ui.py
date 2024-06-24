@@ -6,6 +6,7 @@ import time
 import messager as m
 #https://www.color-hex.com/color-palette/28392
 
+M = m.messageManager()
 
 class Worker(QThread):
     responseGenerated = pyqtSignal((str,str))
@@ -15,7 +16,6 @@ class Worker(QThread):
         self.text = text
         self.side = side
         self.num_messages = num_messages
-        self.messageManager = m.messageManager()
 
     @pyqtSlot()
     def run(self):
@@ -34,9 +34,8 @@ class Worker(QThread):
             return
         self.add_message(text,"right")
         
-
     def get_message(self,text):
-        res = self.messageManager.generate_response(text)
+        res = M.generate_response(text)
         self.add_message(res,"left")
         
 
@@ -115,7 +114,7 @@ class appWindow(QMainWindow):
         #worker1.finished.connect(lambda:self.vbox.addWidget(worker1.message,self.num_messages,0,Qt.AlignRight))
         worker1.finished.connect(lambda:worker1.quit())
         worker1.responseGenerated.connect(self.handle_response,Qt.QueuedConnection)
-
+        
         worker2 = Worker(text,"left",self.num_messages)
         #worker2.finished.connect(lambda:self.vbox.addWidget(worker2.message,self.num_messages,1,Qt.AlignLeft))
         worker2.finished.connect(lambda:worker2.quit())
@@ -127,8 +126,6 @@ class appWindow(QMainWindow):
         
 
     def handle_response(self,text,side):
-        print(text,side)
-
         message = QLabel(text)
 
         #correct style
@@ -147,13 +144,9 @@ class appWindow(QMainWindow):
         
         message.setMinimumHeight(80)
         message.setMaximumHeight(4000)      
-        print(self.num_messages) 
-        print("szelesseg",message.sizeHint().width())
-        print("magassag",message.sizeHint().height())
-
+        
         message.setFixedWidth(message.sizeHint().width()+20)
         message.setFixedHeight(message.sizeHint().height()+20)       
-        print("valodi",message.width(),message.height())
 
         self.textbox.setPlainText("")
         if side == "left":
